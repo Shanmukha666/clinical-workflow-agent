@@ -3,28 +3,35 @@ import re
 
 class ExtractionAgent:
     def __init__(self):
-        # No heavy models — simple logic (hackathon safe)
-        pass
+        self.name = "ExtractionAgent"
 
-    def process(self, data):
+    def run(self, data):
         """
-        Process the input data to extract structured medical data and entities.
-        Updates the data dict with 'structured_data' and 'medical_entities'.
+        Main agent execution method.
+        Takes global data, processes it, returns updated data.
         """
+
         raw_data = data.get("raw_data", "").lower()
 
-        data["structured_data"] = self.extract_lab_values(raw_data)
-        data["medical_entities"] = self.extract_medical_entities(raw_data)
+        # Step 1: Extract structured lab data
+        structured = self.extract_lab_values(raw_data)
 
-        # Add log entry
-        data["logs"].append("Extraction agent processed raw data.")
+        # Step 2: Extract medical entities
+        entities = self.extract_medical_entities(raw_data)
+
+        # Step 3: Update global contract
+        data["structured_data"] = structured
+        data["medical_entities"] = entities
+
+        # Step 4: Add agent log
+        data["logs"].append({
+            "agent": self.name,
+            "message": "Extracted structured medical data and entities"
+        })
 
         return data
 
     def extract_lab_values(self, text):
-        """
-        Extract lab values using regex patterns.
-        """
         patterns = {
             "hemoglobin": r"(hb|hemoglobin)\s*[:\-]?\s*(\d+\.?\d*)",
             "wbc": r"(wbc)\s*[:\-]?\s*(\d+)",
@@ -43,29 +50,13 @@ class ExtractionAgent:
         return result
 
     def extract_medical_entities(self, text):
-        """
-        Extract symptoms, conditions, medications using keyword matching.
-        """
-
         symptom_keywords = ["fatigue", "fever", "weakness", "pain", "cough", "breathlessness"]
         condition_keywords = ["anemia", "infection", "diabetes", "hypertension"]
         medication_keywords = ["paracetamol", "ibuprofen", "insulin"]
 
-        symptoms = []
-        conditions = []
-        medications = []
-
-        for word in symptom_keywords:
-            if word in text:
-                symptoms.append(word)
-
-        for word in condition_keywords:
-            if word in text:
-                conditions.append(word)
-
-        for word in medication_keywords:
-            if word in text:
-                medications.append(word)
+        symptoms = [w for w in symptom_keywords if w in text]
+        conditions = [w for w in condition_keywords if w in text]
+        medications = [w for w in medication_keywords if w in text]
 
         return {
             "symptoms": symptoms,
@@ -83,7 +74,7 @@ if __name__ == "__main__":
     data = {
         "patient_id": "123",
         "input_type": "text",
-        "raw_data": "Patient report: Hb: 6.5 g/dL, WBC: 12000, symptoms include fatigue and shortness of breath. Condition: anemia.",
+        "raw_data": "Patient report: Hb: 6.5 g/dL, WBC: 12000, fatigue and shortness of breath. Condition: anemia.",
         "structured_data": {},
         "medical_entities": {},
         "decision": {},
@@ -91,7 +82,7 @@ if __name__ == "__main__":
         "logs": []
     }
 
-    updated_data = agent.process(data)
+    result = agent.run(data)
 
     print("✅ OUTPUT:\n")
-    print(updated_data)
+    print(result)
