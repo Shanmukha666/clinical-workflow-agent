@@ -47,7 +47,6 @@ class ExtractionAgent:
         Extract symptoms, conditions, medications using keyword matching.
         """
 
-        # Basic keyword lists (expand if needed)
         symptom_keywords = ["fatigue", "fever", "weakness", "pain", "cough", "breathlessness"]
         condition_keywords = ["anemia", "infection", "diabetes", "hypertension"]
         medication_keywords = ["paracetamol", "ibuprofen", "insulin"]
@@ -77,6 +76,8 @@ class ExtractionAgent:
 
 # ✅ TEST BLOCK
 if __name__ == "__main__":
+    print("🚀 Running Extraction Agent...\n")
+
     agent = ExtractionAgent()
 
     data = {
@@ -91,3 +92,6 @@ if __name__ == "__main__":
     }
 
     updated_data = agent.process(data)
+
+    print("✅ OUTPUT:\n")
+    print(updated_data)
